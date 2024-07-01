@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+
+  db:
+    image: postgres:16.3-alpine3.20
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: laser_defender
+    volumes:
+      - .docker/dbdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
