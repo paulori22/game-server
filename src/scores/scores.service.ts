@@ -20,7 +20,7 @@ export class ScoresService {
   }
 
   findAllLeaderBoard() {
-    return this.scoreRepository.find({ order: { score: 'DESC' } });
+    return this.scoreRepository.find({ order: { score: 'DESC' }, take: 20 });
   }
 
   findOne(id: string) {
