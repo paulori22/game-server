@@ -3,7 +3,12 @@ import {
   NestMiddleware,
   UnauthorizedException,
 } from '@nestjs/common';
-import * as passport from 'passport';
+// Bundlers (e.g. Vercel) may wrap the CJS passport export under `.default`.
+import * as passportImport from 'passport';
+
+const passport =
+  (passportImport as { default?: typeof passportImport }).default ??
+  passportImport;
 
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
