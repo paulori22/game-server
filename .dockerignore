@@ -1,0 +1,27 @@
+# Dependencies & build output
+node_modules
+dist
+build
+coverage
+.nyc_output
+
+# VCS & local data
+.git
+.docker
+
+# Env & secrets (never bake into images)
+.env
+.env.*
+!.env.example
+
+# Logs & temp
+*.log
+logs
+.temp
+.tmp
+
+# IDE & misc
+.idea
+.vscode
+.gitignore
+.editorconfig

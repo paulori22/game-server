@@ -1,12 +1,53 @@
-version: '3.9'
-
 services:
   app:
-    build: .
-    entrypoint: ./entrypoint-prod.sh
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    environment:
+      NODE_ENV: production
+      APP_PORT: "${APP_PORT:-3000}"
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_DATABASE: ${DB_DATABASE:-laser_defender}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-root}
+      AUTHORIZED_API_KEYS: ${AUTHORIZED_API_KEYS}
     ports:
-      - 3000:3000
+      - "${APP_PORT:-3000}:${APP_PORT:-3000}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:$${APP_PORT}/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-root}
+      POSTGRES_DB: ${DB_DATABASE:-laser_defender}
     volumes:
-      - .:/home/node/app
-    extra_hosts: 
-      - "host.docker.internal:172.17.0.1"
+      - .docker/dbdata-prod:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5

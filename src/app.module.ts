@@ -1,7 +1,8 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ScoresModule } from './scores/scores.module';
+import { GamesModule } from './games/games.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import databaseConfig from './config/database.config';
@@ -20,7 +21,8 @@ import { AuthMiddleware } from './middleware/auth/auth.middleware';
       imports: [ConfigModule],
       useClass: TypeOrmConfigService,
     }),
-    ScoresModule,
+    GamesModule,
+    LeaderboardModule,
     AuthModule,
   ],
   controllers: [AppController],
@@ -28,6 +30,9 @@ import { AuthMiddleware } from './middleware/auth/auth.middleware';
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('');
+    consumer
+      .apply(AuthMiddleware)
+      .exclude({ path: 'health', method: RequestMethod.GET })
+      .forRoutes({ path: '*', method: RequestMethod.ALL });
   }
 }

@@ -1,14 +1,12 @@
-FROM node:20.15-alpine3.19
+FROM node:20-alpine
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash su-exec wget
 
-RUN npm install -g @nestjs/cli@10.3.2
-
-ENV DOCKERIZE_VERSION v0.6.1
-RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
-
-USER node
+COPY docker-dev-entry.sh /usr/local/bin/docker-dev-entry.sh
+RUN chmod +x /usr/local/bin/docker-dev-entry.sh
 
 WORKDIR /home/node/app
+
+# Cache dependencies in the image; bind-mounted named volume still shadows node_modules at runtime.
+COPY package.json package-lock.json ./
+RUN npm ci

@@ -1,3 +1,2 @@
-#!/bin/bash
-npm install
+#!/bin/sh
 npm run start:dev

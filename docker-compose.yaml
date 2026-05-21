@@ -1,27 +1,64 @@
-version: '3.9'
-
 services:
   app:
     build: .
-    entrypoint: dockerize -wait tcp://db:5432 -timeout 40s ./entrypoint.sh
+    working_dir: /home/node/app
+    entrypoint:
+      - /usr/local/bin/docker-dev-entry.sh
+    command:
+      - ./entrypoint.sh
+    environment:
+      APP_PORT: "${APP_PORT:-3000}"
+      # Match bind-mounted repo ownership so npm can update package-lock.json, etc.
+      HOST_UID: ${HOST_UID:-1000}
+      HOST_GID: ${HOST_GID:-1000}
+      # Overrides .env: reach Postgres on the Compose network (not host.docker.internal).
+      DB_HOST: db
     ports:
-      - 3000:3000
+      - "${APP_PORT:-3000}:${APP_PORT:-3000}"
     volumes:
       - .:/home/node/app
-    extra_hosts: 
-      - "host.docker.internal:172.17.0.1"
-    depends_on: 
-      - db
+      # Hide host node_modules; volume is owned correctly after docker-dev-entry chown.
+      # After package.json / package-lock.json changes, recreate this volume (e.g. docker compose down -v && docker compose up --build) so it repopulates from the rebuilt image.
+      - app_node_modules:/home/node/app/node_modules
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:$${APP_PORT}/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 40s
 
   db:
-    image: postgres:16.3-alpine3.20
+    image: postgres:16-alpine
     restart: always
     # set shared memory limit when using docker-compose
     shm_size: 128mb
     environment:
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: laser_defender
+      # Must match app's DB_* in project .env. Init runs only once; wipe .docker/dbdata if you changed these.
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-root}
+      POSTGRES_DB: ${DB_DATABASE:-laser_defender}
     volumes:
       - .docker/dbdata:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  app_node_modules:

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { Score } from 'src/scores/entities/score.entity';
+import { Game } from 'src/games/entities/game.entity';
+import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard-entry.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -15,7 +16,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       database: this.configService.get('database.database'),
       username: this.configService.get('database.username'),
       password: this.configService.get('database.password'),
-      entities: [Score],
+      entities: [Game, LeaderboardEntry],
       synchronize:
         this.configService.get('database.env') === 'development' ? true : false,
       logging:

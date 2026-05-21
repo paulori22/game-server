@@ -3,6 +3,9 @@
 /node_modules
 /build
 
+# Local Docker volumes (Postgres data, etc.)
+/.docker
+
 # Logs
 logs
 *.log
