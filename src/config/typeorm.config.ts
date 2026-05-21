@@ -9,6 +9,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   constructor(private configService: ConfigService) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
+    const ssl = this.configService.get('database.ssl');
     return {
       type: 'postgres',
       host: this.configService.get('database.host'),
@@ -16,6 +17,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       database: this.configService.get('database.database'),
       username: this.configService.get('database.username'),
       password: this.configService.get('database.password'),
+      ssl: ssl ? { rejectUnauthorized: false } : false,
       entities: [Game, LeaderboardEntry],
       synchronize:
         this.configService.get('database.env') === 'development' ? true : false,

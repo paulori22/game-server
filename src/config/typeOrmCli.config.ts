@@ -10,6 +10,7 @@ const databaseConfig: DataSourceOptions = {
   database: process.env.DB_DATABASE,
   username: process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
   entities: [Game, LeaderboardEntry],
   synchronize: process.env.NODE_ENV === 'development' ? true : false,
   logging: process.env.NODE_ENV === 'development' ? true : false,
