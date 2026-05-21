@@ -119,7 +119,9 @@ On Linux, set `HOST_UID` and `HOST_GID` in `.env` to your user id (`id -u` / `id
 | `npm run migration:generate -- src/migrations/Name` | Generate a migration from entity changes (requires DB access) |
 | `npm run migration:run`                             | Apply pending migrations (uses `.env` / `DB_*`)               |
 | `npm run migration:run:prod`                        | Build, then run migrations from compiled `dist/`              |
+| `npm run migration:run:ci`                          | Run compiled migrations (for CI; expects `DB_*` in env)       |
 | `npm run migration:show`                            | List migration status                                         |
+| `npm run migration:show:ci`                         | List migration status from compiled `dist/` (for CI)          |
 | `npm run migration:revert`                          | Revert the last migration                                     |
 
 ## Database migrations
@@ -157,6 +159,23 @@ npm run migration:generate -- src/migrations/DescribeYourChange
 ```
 
 If production already has the tables (e.g. from an earlier deploy) but no migration history, insert a row into `typeorm_migrations` for `InitialSchema1779326692838` instead of running `migration:run`, so later migrations apply cleanly.
+
+### GitHub Actions (production)
+
+Migrations run automatically via [`.github/workflows/migrate-prod.yml`](.github/workflows/migrate-prod.yml) when changes land on `master` that touch migrations, entities, or the TypeORM CLI config. You can also run it manually from **Actions → Migrate production database → Run workflow**.
+
+Add these **repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|--------|-------|
+| `DB_HOST` | Production Postgres host |
+| `DB_PORT` | `5432` |
+| `DB_DATABASE` | Database name |
+| `DB_USERNAME` | Database user |
+| `DB_PASSWORD` | Database password |
+| `DB_SSL` | `true` for Neon / managed Postgres |
+
+Vercel can deploy the app separately; this workflow only updates the database schema. Run migrations before or as part of your release process so the new code and schema stay in sync.
 
 ## Project layout
 

@@ -1,0 +1,58 @@
+name: Migrate production database
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/migrations/**'
+      - 'src/**/entities/**'
+      - 'src/config/typeOrmCli.config.ts'
+      - '.github/workflows/migrate-prod.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: db-migrations-production
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: Apply TypeORM migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Show migration status
+        run: npm run migration:show:ci
+        env:
+          NODE_ENV: production
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_SSL: ${{ secrets.DB_SSL }}
+
+      - name: Run migrations
+        run: npm run migration:run:ci
+        env:
+          NODE_ENV: production
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_DATABASE: ${{ secrets.DB_DATABASE }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_SSL: ${{ secrets.DB_SSL }}

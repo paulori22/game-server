@@ -23,7 +23,9 @@
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:show": "npm run typeorm -- migration:show",
-    "migration:run:prod": "npm run build && node -r dotenv/config node_modules/typeorm/cli.js migration:run -d dist/config/typeOrmCli.config.js"
+    "migration:run:prod": "npm run build && node -r dotenv/config node_modules/typeorm/cli.js migration:run -d dist/config/typeOrmCli.config.js",
+    "migration:show:ci": "node node_modules/typeorm/cli.js migration:show -d dist/config/typeOrmCli.config.js",
+    "migration:run:ci": "node node_modules/typeorm/cli.js migration:run -d dist/config/typeOrmCli.config.js"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
