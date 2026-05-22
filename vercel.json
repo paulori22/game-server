@@ -1,5 +1,3 @@
 {
-  "buildCommand": "npm run build",
-  "installCommand": "npm ci --include=dev",
-  "rewrites": [{ "source": "/(.*)", "destination": "/api" }]
+  "installCommand": "npm ci --include=dev"
 }
