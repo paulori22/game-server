@@ -91,7 +91,10 @@ export class GamesService {
     const mergedDefaultSortField =
       updateGameDto.defaultSortField ?? game.defaultSortField;
 
-    if (updateGameDto.fieldsSchema || updateGameDto.defaultSortField !== undefined) {
+    if (
+      updateGameDto.fieldsSchema ||
+      updateGameDto.defaultSortField !== undefined
+    ) {
       this.assertFieldsSchemaCoherence(
         mergedSchema,
         mergedDefaultSortField,

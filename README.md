@@ -7,7 +7,7 @@ Backend API for managing per-game leaderboards. Each game defines its own score 
 - **Multi-game registry** — Register games with a unique slug, display name, and a JSON field schema (`number` or `string` columns).
 - **Configurable sorting** — Each game has a default sort field and order; leaderboard queries can override `sortBy`, `order`, `limit`, and `offset`.
 - **Leaderboard entries** — One entry per player per game; submission validates payload fields against that game's schema.
-- **API key auth** — All routes except `GET /health` require an `X-API-KEY` header matching a key in `AUTHORIZED_API_KEYS`.
+- **API key auth** — All routes except `GET /health` require an `X-API-KEY` header. Use a **public** key (itch.io client) for game/leaderboard reads and submits; use an **admin** key for creating/updating games.
 - **PostgreSQL** — JSONB storage for flexible per-game fields; schema sync in development only.
 
 ## API overview
@@ -34,7 +34,7 @@ X-API-KEY: your-api-key
 ```bash
 curl -X POST http://localhost:3000/games \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: apikeypass" \
+  -H "X-API-KEY: adminkeypass" \
   -d '{
     "slug": "laser-defender",
     "name": "Laser Defender",
@@ -52,7 +52,7 @@ curl -X POST http://localhost:3000/games \
 ```bash
 curl -X POST http://localhost:3000/games/laser-defender/leaderboard \
   -H "Content-Type: application/json" \
-  -H "X-API-KEY: apikeypass" \
+  -H "X-API-KEY: publickeypass" \
   -d '{
     "playerName": "alice",
     "data": { "score": 12500, "wave": 7 }
@@ -73,7 +73,9 @@ Copy `.env.example` to `.env` and adjust values:
 | `APP_PORT`                                                        | HTTP port (default `3000`)                           |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL connection                                |
 | `DB_SSL`                                                          | Set `true` for SSL connections                       |
-| `AUTHORIZED_API_KEYS`                                             | Comma-separated list of valid API keys               |
+| `PUBLIC_API_KEYS`                                                 | Comma-separated keys for the game client (leaderboard, read games) |
+| `ADMIN_API_KEYS`                                                  | Comma-separated keys for admin routes (`POST`/`PATCH` games) |
+| `ALLOWED_ORIGINS`                                                 | Optional extra HTTPS origins for production CORS (comma-separated) |
 | `HOST_UID`, `HOST_GID`                                            | Linux only: match bind-mount ownership in Docker dev |
 
 ## Running locally
@@ -101,7 +103,7 @@ The app service sets `DB_HOST=db` on the Compose network. Postgres data is store
 docker compose -f docker-compose-prod.yaml up --build
 ```
 
-Production uses `.docker/dbdata-prod` for Postgres data. Set a strong `AUTHORIZED_API_KEYS` value before deploying.
+Production uses `.docker/dbdata-prod` for Postgres data. Set strong `PUBLIC_API_KEYS` and `ADMIN_API_KEYS` in `.env.prod` before deploying (never put the admin key in the itch.io client).
 
 On Linux, set `HOST_UID` and `HOST_GID` in `.env` to your user id (`id -u` / `id -g`) so the dev container can write to the bind-mounted checkout.
 

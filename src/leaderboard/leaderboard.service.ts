@@ -40,7 +40,9 @@ export class LeaderboardService {
     for (const field of schema) {
       const raw = data[field.name];
       if (raw === undefined || raw === null) {
-        throw new BadRequestException(`Missing required field "${field.name}".`);
+        throw new BadRequestException(
+          `Missing required field "${field.name}".`,
+        );
       }
 
       if (field.type === 'number') {
@@ -50,7 +52,9 @@ export class LeaderboardService {
         } else if (typeof raw === 'string') {
           n = Number(raw);
         } else {
-          throw new BadRequestException(`Field "${field.name}" must be a number.`);
+          throw new BadRequestException(
+            `Field "${field.name}" must be a number.`,
+          );
         }
         if (Number.isNaN(n)) {
           throw new BadRequestException(
@@ -60,7 +64,9 @@ export class LeaderboardService {
         result[field.name] = n;
       } else if (field.type === 'string') {
         if (typeof raw !== 'string') {
-          throw new BadRequestException(`Field "${field.name}" must be a string.`);
+          throw new BadRequestException(
+            `Field "${field.name}" must be a string.`,
+          );
         }
         result[field.name] = raw;
       }
@@ -129,10 +135,7 @@ export class LeaderboardService {
 
     if (sortDef.type === 'number') {
       qb = qb
-        .orderBy(
-          `(entry.data->>'${sortDef.name}')::double precision`,
-          order,
-        )
+        .orderBy(`(entry.data->>'${sortDef.name}')::double precision`, order)
         .addOrderBy('entry.updatedAt', 'DESC');
     } else {
       qb = qb

@@ -10,6 +10,8 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
     const ssl = this.configService.get('database.ssl');
+    const isServerless = Boolean(process.env.VERCEL);
+
     return {
       type: 'postgres',
       host: this.configService.get('database.host'),
@@ -18,6 +20,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       username: this.configService.get('database.username'),
       password: this.configService.get('database.password'),
       ssl: ssl ? { rejectUnauthorized: false } : false,
+      ...(isServerless && { extra: { max: 1 } }),
       entities: [Game, LeaderboardEntry],
       synchronize:
         this.configService.get('database.env') === 'development' ? true : false,
