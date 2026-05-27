@@ -49,13 +49,13 @@ import { OriginMiddleware } from './middleware/origin/origin.middleware';
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(OriginMiddleware).forRoutes({
-      path: 'games/:slug/leaderboard*',
+      path: 'games/:slug/leaderboard{*splat}',
       method: RequestMethod.ALL,
     });
 
     consumer
       .apply(AuthMiddleware)
       .exclude({ path: 'health', method: RequestMethod.GET })
-      .forRoutes({ path: '*', method: RequestMethod.ALL });
+      .forRoutes({ path: '{*splat}', method: RequestMethod.ALL });
   }
 }
