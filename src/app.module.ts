@@ -9,9 +9,11 @@ import { AuthModule } from './auth/auth.module';
 import apiKeyConfig from './config/apiKey.config';
 import corsConfig from './config/cors.config';
 import databaseConfig from './config/database.config';
+import mailConfig from './config/mail.config';
 import { TypeOrmConfigService } from './config/typeorm.config';
 import { GamesModule } from './games/games.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { MailModule } from './mail/mail.module';
 import { AuthMiddleware } from './middleware/auth/auth.middleware';
 import { OriginMiddleware } from './middleware/origin/origin.middleware';
 
@@ -19,7 +21,7 @@ import { OriginMiddleware } from './middleware/origin/origin.middleware';
   imports: [
     ConfigModule.forRoot({
       cache: true,
-      load: [databaseConfig, apiKeyConfig, corsConfig],
+      load: [databaseConfig, apiKeyConfig, corsConfig, mailConfig],
     }),
     ThrottlerModule.forRoot([
       {
@@ -35,6 +37,7 @@ import { OriginMiddleware } from './middleware/origin/origin.middleware';
     GamesModule,
     LeaderboardModule,
     AuthModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
