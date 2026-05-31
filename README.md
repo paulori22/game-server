@@ -4,7 +4,7 @@ Backend API for managing per-game leaderboards. Each game defines its own score 
 
 ## Features
 
-- **Multi-game registry** — Register games with a unique slug, display name, and a JSON field schema (`number` or `string` columns).
+- **Multi-game registry** — Register games with a unique slug, display name, and a JSON field schema (`number` or `string` columns, with optional numeric bounds).
 - **Configurable sorting** — Each game has a default sort field and order; leaderboard queries can override `sortBy`, `order`, `limit`, and `offset`.
 - **Leaderboard entries** — One entry per player per game; submission validates payload fields against that game's schema.
 - **API key auth** — All routes except `GET /health` require an `X-API-KEY` header. Use a **public** key (itch.io client) for game/leaderboard reads and submits; use an **admin** key for creating/updating games.
@@ -40,7 +40,9 @@ curl -X POST http://localhost:3000/games \
     "name": "Laser Defender",
     "fieldsSchema": [
       { "name": "score", "type": "number" },
-      { "name": "wave", "type": "number" }
+      { "name": "wave", "type": "number" },
+      { "name": "time", "type": "number", "min": 0, "exclusiveMin": true },
+      { "name": "deaths", "type": "number", "min": 0 }
     ],
     "defaultSortField": "score",
     "defaultSortOrder": "DESC"
@@ -55,7 +57,7 @@ curl -X POST http://localhost:3000/games/laser-defender/leaderboard \
   -H "X-API-KEY: publickeypass" \
   -d '{
     "playerName": "alice",
-    "data": { "score": 12500, "wave": 7 }
+    "data": { "score": 12500, "wave": 7, "time": 342.5, "deaths": 2 }
   }'
 ```
 

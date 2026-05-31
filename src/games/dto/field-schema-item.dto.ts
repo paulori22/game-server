@@ -1,5 +1,7 @@
 import {
+  IsBoolean,
   IsIn,
+  IsNumber,
   IsOptional,
   IsString,
   Matches,
@@ -21,4 +23,20 @@ export class FieldSchemaItemDto {
   @IsOptional()
   @IsIn(['ASC', 'DESC'])
   sortOrder?: 'ASC' | 'DESC';
+
+  @IsOptional()
+  @IsNumber()
+  min?: number;
+
+  @IsOptional()
+  @IsNumber()
+  max?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  exclusiveMin?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  exclusiveMax?: boolean;
 }

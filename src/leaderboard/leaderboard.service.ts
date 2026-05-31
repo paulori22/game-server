@@ -61,6 +61,26 @@ export class LeaderboardService {
             `Field "${field.name}" is not a valid number.`,
           );
         }
+        if (field.min !== undefined) {
+          const belowMin = field.exclusiveMin ? n <= field.min : n < field.min;
+          if (belowMin) {
+            throw new BadRequestException(
+              field.exclusiveMin
+                ? `Field "${field.name}" must be greater than ${field.min}.`
+                : `Field "${field.name}" must be greater than or equal to ${field.min}.`,
+            );
+          }
+        }
+        if (field.max !== undefined) {
+          const aboveMax = field.exclusiveMax ? n >= field.max : n > field.max;
+          if (aboveMax) {
+            throw new BadRequestException(
+              field.exclusiveMax
+                ? `Field "${field.name}" must be less than ${field.max}.`
+                : `Field "${field.name}" must be less than or equal to ${field.max}.`,
+            );
+          }
+        }
         result[field.name] = n;
       } else if (field.type === 'string') {
         if (typeof raw !== 'string') {
